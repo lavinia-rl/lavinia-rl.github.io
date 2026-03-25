@@ -176,6 +176,10 @@ h6 {
     padding: 0;
 }
 
+.no-underline-ft {
+  text-decoration: none;
+  color: #ff6093;
+}
 
 
 
