@@ -49,20 +49,23 @@
             <div class=abstract>
                 <h2>Abstract</h2>
                 <p>
-                    Existing motion capture datasets, such as AMASS or CMU, predominantly focus on generic locomotion or daily activities, lacking the explosive dynamics of sports and the cultural richness of celebratory gestures. To address this gap, we introduce GINGA, a motion capture dataset specifically tailored for humanoid sports robotics. GINGA includes high-dynamic game actions (e.g., defenses, chip shots) and expressive movements (e.g., famous goal celebrations, cultural dances) captured via a Xsens inertial system. Furthermore, we provide a complete pipeline from capture to control, utilizing General Motion Retargeting (GMR) for the Unitree G1 humanoid and validating the dataset through Imitation Learning using the Beyond Mimic framework. Experimental results demonstrate that our reward tuning enables the robot to learn complex and stable policies for our dataset.
+                    Existing motion capture datasets predominantly focus on generic locomotion or daily activities, lacking the explosive dynamics of sports and the cultural richness of celebratory gestures. To address this gap, we introduce Ginga, a motion capture dataset specifically tailored for humanoid sports robotics. Ginga includes high-dynamic game actions, such as defenses and chip shots, alongside expressive movements like famous goal celebrations and cultural dances, all captured via a Xsens inertial system. Furthermore, we provide a complete pipeline from capture to control, utilizing General Motion Retargeting (GMR) for the Unitree G1 humanoid and validating the dataset through Imitation Learning using the Beyond Mimic framework. Experimental results demonstrate that our reward tuning enables the robot to learn complex and stable policies for our dataset.
                 </p>
                 <iframe 
                 class="youtube-video"
                 src="https://www.youtube.com/embed/h-Y97xErGL8"
                 allowfullscreen>
                 </iframe>
+                <video class="video" controls>
+                    <source src="video.mp4" type="video/mp4">
+                </video>
             </div>
         </div>
         <div class="section">
             <div class=content>
                 <h5>Motivation</h5>
                 <p>
-                    Lorem ipsum odor amet, consectetuer adipiscing elit. Commodo odio aenean curabitur himenaeos curabitur turpis. Auctor a suscipit consectetur ridiculus vel convallis nostra adipiscing. Sodales quisque turpis id augue taciti ridiculus tellus. Adipiscing orci semper volutpat nisl metus hendrerit gravida suspendisse. Nulla egestas ultricies velit arcu amet donec suspendisse. Himenaeos erat pellentesque blandit nostra nisl rhoncus. Porttitor quis elementum tellus amet mi varius hac velit.</p>
+                    The RoboCup initiative posits a grand challenge: by the mid-21st century, a team of fully autonomous humanoid robot soccer players shall play a soccer game against the winner of the most recent World Cup, complying with official FIFA rules. To bridge the gap between current robotic capabilities and human-level performance, robots must transcend basic walking gaits. They require "GINGA", a term synonymous with the Brazilian spirit of movement, representing agility, rhythm, and creativity. Currently, the development of athletic behaviors in humanoids faces a significant bottleneck regarding data. While large-scale datasets exist, they often lack specific utility for competitive sports. A robot goalkeeper needs to perform a defense instantly, while a striker needs to execute different types of shots to score goals and celebrate to engage with the crowd. Existing datasets often lack these specific, culturally rich, and physically explosive motions.
                 </p>
             </div>
         </div>
@@ -71,24 +74,70 @@
                 <h5>Evaluation</h5>
                 <h6>Data</h6>
                 <p>
-                    Lorem ipsum odor amet, consectetuer adipiscing elit. Commodo odio aenean curabitur himenaeos curabitur turpis. Auctor a suscipit consectetur ridiculus vel convallis nostra adipiscing. Sodales quisque turpis id augue taciti ridiculus tellus. Adipiscing orci semper volutpat nisl metus hendrerit gravida suspendisse. Nulla egestas ultricies velit arcu amet donec suspendisse. Himenaeos erat pellentesque blandit nostra nisl rhoncus. Porttitor quis elementum tellus amet mi varius hac velit.</p>
+                    We utilized an Xsens inertial motion capture system to capture high-fidelity joint rotations without the occlusion issues common in optical systems. The dataset is organized into two distinct motion categories:
+                    <ul>
+                        <li><strong>Game Actions:</strong>
+                            Functional movements required for competitive play, including single-leg balances, sprinting, step-overs, and the Trivela kick;
+                        </li>
+                        <li><strong>Human-Robot Interaction (HRI) movements:</strong>
+                            Motions crucial for communication and social connection, featuring routines like the CR7 Siu celebration, the Macarena, and Neymar's Paradinha Penalti.
+                        </li>
+                    </ul>
+                    During the capture process, several challenges inherent to inertial technology were addressed to ensure high fidelity:
+                    <ul>
+                        <li>We performed physical checks and initial calibrations for each sensor, as incorrect positioning generated significant distortions in the kinematic model;
+                        </li>
+                        <li>
+                            Because the software's biomechanical solver is highly sensitive to the actor's dimensions, we created unique anthropometric profiles for each participant;
+                        </li>
+                        <li>
+                            To combat the accumulation of error (drift) caused by prolonged, explosive movements, we periodically interrupted sessions to recalibrate the entire suit;
+                        </li>
+                        <li>
+                            A careful post-processing step was implemented to rotate and align the initial pose of all clips to the same global reference frame.
+                        </li>
+                    </ul>
+                </p>
                 <img class="image" src="/images/image-example.svg">
                 <h6>Method</h6>
                 <p>
-                    Lorem ipsum odor amet, consectetuer adipiscing elit. Commodo odio aenean curabitur himenaeos curabitur turpis. Auctor a suscipit consectetur ridiculus vel convallis nostra adipiscing. Sodales quisque turpis id augue taciti ridiculus tellus. Adipiscing orci semper volutpat nisl metus hendrerit gravida suspendisse. Nulla egestas ultricies velit arcu amet donec suspendisse. Himenaeos erat pellentesque blandit nostra nisl rhoncus. Porttitor quis elementum tellus amet mi varius hac velit.</p>
+                    Our methodology provides a robust workflow to transfer human motion to a physical humanoid. A critical challenge in this domain is the kinematic mismatch between the human actor and the robot. To resolve this, we employed General Motion Retargeting (GMR) to map the Xsens skeletal data to the URDF/MJCF description of the Unitree G1 robot, ensuring physical constraints were respected prior to training.
+                </p>
+                <p>
+                    To validate the utility of the Ginga dataset, we trained a control policy using Reinforcement Learning via the Beyond Mimic framework in IsaacLab. Our approach incorporated specific training mechanisms:
+                    <ul>
+                        <li> 
+                            An adaptive sampling mechanism identified frames where the robot frequently lost balance and increased their sampling frequency, accelerating convergence;
+                        </li>
+                        <li> 
+                            A compact tracking reward combined local joint imitation with world-frame global constraints to reduce long-term drift in locomotion tasks;
+                        </li>
+                        <li> 
+                            We decoupled the control frequency from the native capture rate (240 FPS) and extended episode truncation limits to safely process longer gestures and respect the robot's physical constraints.
+                        </li>
+                    </ul>
+                </p>
                 <h6>Results</h6>
                 <p>
-                    Lorem ipsum odor amet, consectetuer adipiscing elit. Commodo odio aenean curabitur himenaeos curabitur turpis. Auctor a suscipit consectetur ridiculus vel convallis nostra adipiscing. Sodales quisque turpis id augue taciti ridiculus tellus. Adipiscing orci semper volutpat nisl metus hendrerit gravida suspendisse. Nulla egestas ultricies velit arcu amet donec suspendisse. Himenaeos erat pellentesque blandit nostra nisl rhoncus. Porttitor quis elementum tellus amet mi varius hac velit.</p>
-                <h6>User Study</h6>
+                    The training metrics indicate that the Unitree G1 robot agent was able to successfully track the kinematic references of all categories in the dataset. Average reward curves for movements, such as the featured celebrations, showed a rapid and consistent rise in the first 5,000 steps, reaching a plateau of stability between 140 and 190 reward points. The variation in the total asymptotic performance is a direct consequence of the different durations of the original reference clips, rather than a reflection of tracking failures or policy instability.
+                </p>
                 <p>
-                    Lorem ipsum odor amet, consectetuer adipiscing elit. Commodo odio aenean curabitur himenaeos curabitur turpis. Auctor a suscipit consectetur ridiculus vel convallis nostra adipiscing. Sodales quisque turpis id augue taciti ridiculus tellus. Adipiscing orci semper volutpat nisl metus hendrerit gravida suspendisse. Nulla egestas ultricies velit arcu amet donec suspendisse. Himenaeos erat pellentesque blandit nostra nisl rhoncus. Porttitor quis elementum tellus amet mi varius hac velit.</p>
+                    The robustness of these policies was verified through cross-validation between simulators, where the training performed in IsaacLab was successfully tested on MuJoCo. The movements occurred fluidly, replicating the human athlete's intention despite the challenges of inertial technology, such as the absence of ground reaction force data.
+                </p>
                 </div>
         </div>
         <div class="section">
             <div class=content>
                 <h5>Related Work</h5>
                 <p>
-                    Lorem ipsum odor amet, consectetuer adipiscing elit. Commodo odio aenean curabitur himenaeos curabitur turpis. Auctor a suscipit consectetur ridiculus vel convallis nostra adipiscing. Sodales quisque turpis id augue taciti ridiculus tellus. Adipiscing orci semper volutpat nisl metus hendrerit gravida suspendisse. Nulla egestas ultricies velit arcu amet donec suspendisse. Himenaeos erat pellentesque blandit nostra nisl rhoncus. Porttitor quis elementum tellus amet mi varius hac velit.</p>
+                    High-fidelity motion data is foundational for data-driven animation, though its quality is linked to acquisition hardware. Optical systems have been the industry standard for repositories like AMASS and CMU, but they are often constrained to studios and suffer from occlusions. Inertial systems provide an occlusion-free alternative crucial for capturing explosive sports dynamics, yet datasets utilizing them for competitive soccer remain scarce.
+                </p>
+                <p>
+                    Physics-based character control has evolved from trajectory tracking, as seen in DeepMimic, to utilizing deep reinforcement learning and adversarial priors (AMP) to encourage natural motion styles. To apply these learned policies to diverse robot morphologies, retargeting techniques like GMR are essential to handle structural discrepancies. Our methodology builds upon these foundations by utilizing the Beyond Mimic framework, emphasizing the robust recovery required for transferring dynamic motions to the Unitree G1.
+                </p>
+                <p>
+                    Furthermore, the domain of humanoid sports has shifted toward learning-based agility, with significant advancements in bipedal fall recovery, agile ball manipulation, and extreme balance tasks. While these works achieve impressive functional competence, they lack the variety of movements found in actual gameplay and human interaction. Our work complements this existing research by introducing GINGA, integrating culturally rich celebrations alongside competitive sports movements.
+                </p>
                 </p>
                     <div class="related-links-container">
                         <div class="related-links">
